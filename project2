@@ -1,0 +1,31 @@
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+
+data = pd.read_csv(r'C:\Users\user\Desktop\New folder\creditcard.csv')
+
+data.dropna(inplace=True)
+
+scaler = StandardScaler()
+data[['Amount', 'Time']] = scaler.fit_transform(data[['Amount', 'Time']])
+
+print(data['Class'].value_counts())
+
+smote = SMOTE(sampling_strategy='auto')
+X_resampled, y_resampled = smote.fit_resample(data.drop('Class', axis=1), data['Class'])
+
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42)
+
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+
+y_pred = rf_model.predict(X_test)
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
